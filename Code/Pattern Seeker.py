@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+
+@author: Ivan Paniagua, Edgar Machuca, Daniel Chavez, Juan Pablo Rivera
+"""
+    
 import pandas as pd
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -14,7 +19,7 @@ data = pd.read_excel(data_dir, 'Raw data 8XX')
 parametros = pd.read_excel(data_dir, 'Parametros')
 parametros = parametros.iloc[2:,:8]
 
-#%%
+#%% Replace text
 def replace_text(x, to_replace, replacement):
     try: 
         x= x.replace(to_replace, replacement)
@@ -22,12 +27,12 @@ def replace_text(x, to_replace, replacement):
         pass
     return x
 
-#%% 
+#%% Homogeneizar datos
 parametros= parametros.apply(replace_text, args= ('Truven simpler', 'Truven Simpler'))
 data= data.apply(replace_text, args= ('Truven simpler', 'Truven Simpler'))
 data= data.apply(replace_text, args= ('Truven simpler', 'Truven Simpler'))
 
-#%%
+#%% Convertir a valores numericos hoja 1
 filasdata,coldata=data.shape
 for a in range(filasdata):
     for b in range(coldata):
@@ -35,7 +40,7 @@ for a in range(filasdata):
             data.iloc[a,b]=pd.to_numeric(data.iloc[a,b])
         except:
             pass
-#%%
+#%%  Convertir a valores numericos hoja 2
 filaspar,colpar=parametros.shape
 for a in range(filaspar):
     for b in range(colpar):
@@ -44,13 +49,13 @@ for a in range(filaspar):
         except:
             pass
         
-    #%% Usar mi funcion
+#%% Data quality report
 data_quality_report_data= mylibE.DQR(data)
 data_quality_report_par = mylibE.DQR(parametros)
 #%% Comprobacion parametros
 NumdatosDatocolumna= data_quality_report_par.iloc[1,2] 
 
-#%%
+#%% Mostrar repetidos
 RepetidosIgualSeg=pd.DataFrame(columns=['Columna','Datocolumna','Segmentación'])
 Suma=0
 RepetidosDifSeg=pd.DataFrame(columns=['Columna','Datocolumna','Segmentación1','Segmentación2'])
@@ -76,7 +81,7 @@ for k in range (0,NumdatosDatocolumna):
                 #print(Col, DC, Res, Col2, DC2, Res2, 'Tienen diferente segmentación')
 
 
-#%%
+#%% Incongruencia entre pestañas
 Nocuadrados=pd.DataFrame(columns=['Columna','Datocolumna','Segmentaciónraw','Segmentacionpar'])
 Suma=0
 for k in range (0,NumdatosDatocolumna):
@@ -96,12 +101,12 @@ for k in range (0,NumdatosDatocolumna):
                     #print(Col, DC, Resul)
             except:
                 pass
-          
-#%%
+            
+#%% Insertar columnas adicionales
 data.insert(31,'Segautomatizada',0)
 data.insert(32,'Superpuestos',0)
 
-#%%
+#%% Segmentacion nueva y superpuestos (posibles mal segmentados originalmente)
 Superpuestas=pd.DataFrame(columns=['Columna','Datocolumna','Segmentaciónpasada','Segmentacionnueva'])
 Suma=0
 data.iloc[:,[31,32]]=0
@@ -131,7 +136,7 @@ for k in range (0,NumdatosDatocolumna):
             pass
 Filassuperpuestas=data[data['Superpuestos'] != 0]
 
-#%%
+#%% Parametros encontrados
 Parametrosencontrados=pd.DataFrame(columns=['Columna','Datocolumna','Segmentación'])
 Suma=0
 columnasenpar=pd.DataFrame(parametros.iloc[:,0].unique())
@@ -170,7 +175,7 @@ for e in range(Numcolunicaspar):
     else:
         pass
     
-#%%
+#%% Parametros propuestos
 Parametrospropuestos=pd.DataFrame(columns=['Columna','Datocolumna','Segmentación'])
 Suma2=0
 NumdatosParametrosencon= len(Parametrosencontrados)
@@ -200,7 +205,7 @@ for i in range (0,NumdatosParametrosencon):
         else:
             pass
 
-#%%
+#%% Graficos de costos (en caso de haberlos)
 Segmentaciones=pd.DataFrame(data.loc[:]['Segmentation Offering'].unique()).dropna()
 meses=pd.DataFrame(data.loc[:]['Month'].unique()).dropna()
 NumSegmentaciones=len(Segmentaciones)
